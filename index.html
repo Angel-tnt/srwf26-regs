@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tonaltech — Dashboard Reglamento Técnico SRWF26</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a26;
+  --border: #2a2a3a;
+  --text: #e8e8f0;
+  --text-dim: #8888a0;
+  --accent: #ff3d00;
+  --accent2: #ff6d33;
+  --safety: #ff1744;
+  --safety-bg: rgba(255,23,68,0.08);
+  --performance: #ffc107;
+  --performance-bg: rgba(255,193,7,0.08);
+  --general: #448aff;
+  --general-bg: rgba(68,138,255,0.08);
+  --pass: #00e676;
+  --fail: #ff1744;
+  --pp: #e040fb;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+.container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+
+/* HEADER */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,10,15,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
+.logo span { color: var(--accent); }
+.header-meta { font-size: 13px; color: var(--text-dim); text-align: right; }
+.header-meta strong { color: var(--text); }
+
+/* SEARCH + FILTERS */
+.controls {
+  display: flex; gap: 12px; flex-wrap: wrap; padding: 20px 0;
+  position: sticky; top: 72px; z-index: 90;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.search-box {
+  flex: 1; min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-box:focus { border-color: var(--accent); }
+.filter-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 18px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.filter-btn:hover { border-color: var(--text-dim); color: var(--text); }
+.filter-btn.active-safety { border-color: var(--safety); color: var(--safety); background: var(--safety-bg); }
+.filter-btn.active-perf { border-color: var(--performance); color: var(--performance); background: var(--performance-bg); }
+.filter-btn.active-gen { border-color: var(--general); color: var(--general); background: var(--general-bg); }
+.filter-btn.active-all { border-color: var(--accent); color: var(--accent); }
+
+/* STATS BAR */
+.stats-bar {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px; padding: 20px 0;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-card .num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1; }
+.stat-card .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.stat-safety .num { color: var(--safety); }
+.stat-perf .num { color: var(--performance); }
+.stat-gen .num { color: var(--general); }
+.stat-total .num { color: var(--accent); }
+
+/* ARTICLES */
+.article-section {
+  margin: 32px 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.article-header {
+  background: var(--surface);
+  padding: 16px 24px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  user-select: none;
+  transition: background 0.2s;
+}
+.article-header:hover { background: var(--surface2); }
+.article-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
+.article-title .art-num { color: var(--accent); margin-right: 8px; }
+.chevron { font-size: 20px; transition: transform 0.3s; color: var(--text-dim); }
+.article-section.open .chevron { transform: rotate(180deg); }
+.article-body { display: none; padding: 0; }
+.article-section.open .article-body { display: block; }
+
+/* RULE CARDS */
+.rule-card {
+  border-top: 1px solid var(--border);
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  transition: background 0.2s;
+}
+.rule-card:hover { background: rgba(255,255,255,0.02); }
+.rule-top {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.rule-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent2);
+  white-space: nowrap;
+}
+.rule-name { font-weight: 600; font-size: 15px; flex: 1; }
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.badge-safety { background: var(--safety-bg); color: var(--safety); border: 1px solid rgba(255,23,68,0.3); }
+.badge-performance { background: var(--performance-bg); color: var(--performance); border: 1px solid rgba(255,193,7,0.3); }
+.badge-general { background: var(--general-bg); color: var(--general); border: 1px solid rgba(68,138,255,0.3); }
+.badge-pp { background: rgba(224,64,251,0.1); color: var(--pp); border: 1px solid rgba(224,64,251,0.3); font-size: 10px; }
+.rule-desc { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+.rule-measures {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
+}
+.measure {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  display: flex; align-items: center; gap: 6px;
+}
+.measure .lbl { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+.measure .val { color: var(--pass); font-weight: 600; }
+.measure .val-max { color: var(--performance); font-weight: 600; }
+.penalty-tag {
+  background: rgba(255,61,0,0.1);
+  border: 1px solid rgba(255,61,0,0.3);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.rule-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.note {
+  background: rgba(255,193,7,0.06);
+  border-left: 3px solid var(--performance);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-dim);
+  border-radius: 0 6px 6px 0;
+  margin-top: 4px;
+}
+.note-safety {
+  background: rgba(255,23,68,0.06);
+  border-left-color: var(--safety);
+}
+
+/* NEW FOR 2026 */
+.new-tag {
+  background: rgba(0,230,118,0.12);
+  color: var(--pass);
+  border: 1px solid rgba(0,230,118,0.3);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+
+/* PRINT */
+@media print {
+  body { background: #fff; color: #111; font-size: 11px; }
+  header, .controls, .stats-bar, footer { display: none; }
+  .article-section { border: 1px solid #ccc; break-inside: avoid; margin: 8px 0; }
+  .article-body { display: block !important; }
+  .rule-card { padding: 8px 12px; }
+  .badge { border: 1px solid #999; }
+  .measure { border: 1px solid #ccc; }
+  .note { border-left: 2px solid #999; }
+  * { color: #111 !important; background: transparent !important; }
+}
+
+@media (max-width: 600px) {
+  .article-title { font-size: 17px; }
+  .rule-card { padding: 14px 16px; }
+  .header-inner { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container header-inner">
+    <div class="logo">TONALTECH <span>× SRWF26</span></div>
+    <div class="header-meta">
+      <strong>Reglamento Técnico — World Finals Singapore 2026</strong><br>
+      Versión: 10 Feb 2026 · Dashboard de Cumplimiento
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="controls" id="controls">
+    <input type="text" class="search-box" id="searchBox" placeholder="Buscar regla, artículo o palabra clave…">
+    <button class="filter-btn active-all" data-filter="all" onclick="setFilter('all', this)">Todas</button>
+    <button class="filter-btn" data-filter="safety" onclick="setFilter('safety', this)">🔴 Safety</button>
+    <button class="filter-btn" data-filter="performance" onclick="setFilter('performance', this)">🟡 Performance</button>
+    <button class="filter-btn" data-filter="general" onclick="setFilter('general', this)">🔵 General</button>
+    <button class="filter-btn" data-filter="pp" onclick="setFilter('pp', this)">⚡ PP+</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-card stat-total"><div class="num" id="statTotal">0</div><div class="label">Reglas Totales</div></div>
+    <div class="stat-card stat-safety"><div class="num" id="statSafety">0</div><div class="label">Safety</div></div>
+    <div class="stat-card stat-perf"><div class="num" id="statPerf">0</div><div class="label">Performance</div></div>
+    <div class="stat-card stat-gen"><div class="num" id="statGen">0</div><div class="label">General</div></div>
+  </div>
+
+  <div id="rulesContainer"></div>
+
+</div>
+
+<footer>
+  <div class="container">
+    Tonaltech — Dashboard interno de cumplimiento técnico · Datos extraídos del SRWF26 Technical Regulations (10 Feb 2026)<br>
+    Este documento es una herramienta de referencia rápida. El reglamento oficial prevalece en caso de discrepancia.
+  </div>
+</footer>
+
+<script>
+const DATA = [
+  // ══════════════════════════════════════════════════
+  // ARTICLE T3 — CARRO COMPLETAMENTE ENSAMBLADO
+  // ══════════════════════════════════════════════════
+  {
+    article: "T3", articleName: "Carro Completamente Ensamblado",
+    rules: [
+      {
+        id: "T3.1", name: "Diseño y Manufactura", type: "general", penalty: "5 pts c/u", pp: false,
+        desc: "Todos los carros deben ser diseñados con CAD y manufacturados con CAM (CNC). El cuerpo debe ser fabricado por remoción de material con router/fresadora CNC. Ambos carros de carrera deben tener geometría idéntica en sus componentes. Se debe entregar la calcomanía holográfica del Model Block oficial.",
+        measures: [],
+        note: "Recomendado: Autodesk Fusion 360 (CAD) + Denford QuickCAM PRO (CAM)"
+      },
+      {
+        id: "T3.2", name: "Construcción Segura", type: "safety", penalty: "10 pts c/u", pp: false,
+        desc: "Los carros se inspeccionarán en scrutineering para verificar que sean seguros para correr. Si un carro se considera inseguro, se dará una sesión de 20 min para repararlo. Durante carreras, los oficiales pueden inspeccionar e imponer penalización si es inseguro.",
+        measures: [],
+        note: "Si el juez determina que algo es inseguro, se DEBE reparar antes de correr."
+      },
+      {
+        id: "T3.3", name: "Componentes Definidos", type: "performance", penalty: "20 pts", pp: false,
+        desc: "El ensamble del carro SOLO puede consistir de los componentes listados en T1.1: cuerpo, nose cone assembly, rear wing assembly, wheel support systems (x2), tether line guides (x2), superficie/calcomanías, STEM Racing logo (x2), Halo, Casco, Lastre legal.",
+        measures: [],
+        note: "⚠️ PERFORMANCE: Si no cumples, quedas INELEGIBLE para Fastest Car y Best Engineered Car."
+      },
+      {
+        id: "T3.4", name: "Ancho Total", type: "general", penalty: "5 pts/mm", pp: true,
+        desc: "Ancho máximo del carro ensamblado, medido normal al plano de referencia vertical, entre los bordes exteriores del componente más ancho.",
+        measures: [
+          { label: "Mín", value: "65.0 mm", isMax: false },
+          { label: "Máx", value: "85.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T3.5", name: "Altura Total", type: "general", penalty: "5 pts/mm", pp: true,
+        desc: "Altura máxima del carro ensamblado, medida desde la pista hasta el punto más alto. Se mide CON cartucho de 8g insertado y el carro descansando en las 4 ruedas sin asistencia externa.",
+        measures: [
+          { label: "Máx", value: "65.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T3.6", name: "Peso Total", type: "performance", penalty: "10 pts/gramo", pp: true,
+        desc: "Peso del carro SIN cartucho de potencia. Si queda bajo peso en registro y se confirma en scrutineering, se aplica penalización. Ningún carro correrá bajo peso: se añadirá lastre de 0.2g por cada 0.1g bajo peso en la parte inferior del carro.",
+        measures: [
+          { label: "Mín", value: "48.0 g", isMax: false }
+        ],
+        note: "⚠️ CRÍTICO: Si pesas menos de 48g, recibes penalización Y te añaden lastre obligatorio (doble penalización efectiva)."
+      },
+      {
+        id: "T3.7", name: "Despeje de Pista", type: "general", penalty: "10 pts/mm", pp: true,
+        desc: "Distancia entre la superficie de la pista y cualquier componente del carro (excepto ruedas), medida normal a la pista. Se mide CON cartucho de 8g insertado y el carro en 4 ruedas sin asistencia.",
+        measures: [
+          { label: "Mín", value: "1.5 mm", isMax: false }
+        ]
+      },
+      {
+        id: "T3.8", name: "Estado durante Carreras", type: "general", penalty: "5 pts", pp: false,
+        desc: "El ensamble debe estar diseñado para que NO se remuevan, reemplacen o añadan items durante eventos de carrera, excepto los listados en T3.9 y los cartuchos de potencia.",
+        measures: []
+      }
+    ]
+  },
+  // ══════════════════════════════════════════════════
+  // ARTICLE T4 — CUERPO (BODY)
+  // ══════════════════════════════════════════════════
+  {
+    article: "T4", articleName: "Cuerpo (Body)",
+    rules: [
+      {
+        id: "T4.1", name: "Construcción del Cuerpo", type: "general", penalty: "20 pts", pp: false,
+        desc: "Una pieza CONTINUA ÚNICA de STEM Racing Model Block manufacturada por CNC debe existir detrás del Plano de Referencia A, abarcando tanto la carga virtual como la cámara del cartucho de potencia.",
+        measures: []
+      },
+      {
+        id: "T4.2", name: "Carga Virtual (Virtual Cargo)", type: "performance", penalty: "25 pts", pp: false,
+        desc: "Debe estar completamente envuelta por el cuerpo y posicionada ENTRE las líneas centrales de las ruedas delanteras y traseras. Su superficie superior debe estar ubicada simétricamente y posicionada normal (90°) al plano de referencia vertical. Puede compartir caras con el cuerpo. Puede coincidir con el contenedor de lastre, pero NO con el pocket del Halo.",
+        measures: [
+          { label: "Largo mín", value: "60.0 mm", isMax: false },
+          { label: "Ancho mín", value: "10.0 mm", isMax: false },
+          { label: "Alto mín", value: "10.0 mm", isMax: false },
+          { label: "Prof. mín", value: "55.0 mm", isMax: false }
+        ],
+        note: "⚠️ PERFORMANCE: La carga virtual NO puede coincidir con el pocket del Halo."
+      },
+      {
+        id: "T4.3", name: "Identificación Carga Virtual", type: "general", penalty: "5 pts", pp: false,
+        desc: "La ubicación y cumplimiento DEBEN estar claramente dimensionados en los planos de ingeniería (desde líneas centrales de ejes y altura sobre pista). DEBE identificarse con achurado, sombreado, color sólido o línea de contorno contrastante.",
+        measures: []
+      },
+      {
+        id: "T4.4.1", name: "Halo — Inclusión", type: "performance", penalty: "10 pts", pp: false, isNew: true,
+        desc: "El Halo DEBE incluirse en el diseño SIN cambios dimensionales ni de perfil superficial. Archivo: halo_2026_with_6mm_hole_and_sr_logo descargable de stemracing.com/downloads.",
+        measures: []
+      },
+      {
+        id: "T4.4.2", name: "Halo — Visibilidad Frontal y Lateral", type: "general", penalty: "10 pts", pp: false,
+        desc: "La visibilidad del Halo NO debe estar físicamente obstruida por ningún otro componente cuando se ve desde la vista frontal o lateral.",
+        measures: []
+      },
+      {
+        id: "T4.4.3", name: "Halo — Visibilidad Superior", type: "general", penalty: "10 pts", pp: false,
+        desc: "El Halo NO debe estar físicamente obstruido en la vista superior EXCEPTO por el casco.",
+        measures: []
+      },
+      {
+        id: "T4.4.4", name: "Halo — Altura Muesca Circular", type: "safety", penalty: "5 pts", pp: false,
+        desc: "El centro de la muesca circular (Circular Notch) debe estar a 34.0mm (±1.0mm) sobre la superficie de la pista. Para lograr esto, el fondo del pocket del halo debe estar a 24.0mm y paralelo a la pista en el carro ensamblado.",
+        measures: [
+          { label: "Centro muesca", value: "34.0 mm ±1.0", isMax: false }
+        ]
+      },
+      {
+        id: "T4.4.5", name: "Halo — Prueba de Seguridad 1", type: "safety", penalty: "5 pts", pp: false, isNew: true,
+        desc: "Con el carro soportado sobre un cartucho de potencia, se suspenderá una carga de 1kg para dar una carga de 2kg en el punto de contacto de la muesca circular del Halo.",
+        measures: [
+          { label: "Carga", value: "2.0 kg", isMax: true }
+        ],
+        note: "NUEVA PRUEBA para 2026."
+      },
+      {
+        id: "T4.4.6", name: "Halo — Prueba de Seguridad 2", type: "safety", penalty: "5 pts", pp: false, isNew: true,
+        desc: "Con el carro soportado horizontalmente por la cámara del cartucho, se aplicará una carga estática de 300g al borde frontal del halo usando un accesorio de fijación (2026_Attachment Fixture).",
+        measures: [
+          { label: "Carga", value: "300 g", isMax: true }
+        ]
+      },
+      {
+        id: "T4.5", name: "Casco (Helmet)", type: "general", penalty: "5 pts", pp: false,
+        desc: "Pieza estándar diseñada por STEM Racing que DEBE incluirse SIN cambios dimensionales. Archivo: 2026_helmet_with_6mm_dia_spigot_final. Puede fabricarse de cualquier material. Espiga de 6.0mm de diámetro, 4.0mm de largo.",
+        measures: []
+      },
+      {
+        id: "T4.6", name: "Ubicación Logo STEM Racing", type: "general", penalty: "5 pts", pp: false,
+        desc: "Una calcomanía del logo STEM Racing DEBE estar adherida completamente a CADA LADO del carro, posicionada entre las ruedas delanteras y traseras, y ser 100% visible en la vista lateral respectiva. Dimensiones: 30mm × 15mm horizontal. Seleccionar negro o blanco para máximo contraste.",
+        measures: [
+          { label: "Ancho", value: "30.0 mm", isMax: false },
+          { label: "Alto", value: "15.0 mm", isMax: false }
+        ]
+      },
+      {
+        id: "T4.7", name: "Número de Equipo", type: "general", penalty: "2 pts", pp: false,
+        desc: "El número oficial debe mostrarse en el cuerpo entre el borde frontal del Halo y el Plano de Referencia A. Debe ser visible en vista superior con altura mínima de texto de 8mm. También mostrar 'A' o 'B' en los carros respectivos con las mismas restricciones.",
+        measures: [
+          { label: "Altura texto mín", value: "8.0 mm", isMax: false }
+        ]
+      },
+      {
+        id: "T4.8", name: "Espesor de Calcomanías", type: "general", penalty: "5 pts", pp: false,
+        desc: "Espesor total de cualquier calcomanía, excluyendo acabados superficiales.",
+        measures: [
+          { label: "Máx", value: "0.5 mm", isMax: true }
+        ]
+      }
+    ]
+  },
+  // ══════════════════════════════════════════════════
+  // ARTICLE T5 — CÁMARA DEL CARTUCHO
+  // ══════════════════════════════════════════════════
+  {
+    article: "T5", articleName: "Cámara del Cartucho de Potencia",
+    rules: [
+      {
+        id: "T5.1", name: "Diámetro", type: "safety", penalty: "5 pts", pp: false,
+        desc: "Diámetro de la cámara del cartucho, medido en cualquier punto a través de su profundidad mínima.",
+        measures: [
+          { label: "Mín", value: "18.0 mm", isMax: false },
+          { label: "Máx", value: "18.5 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T5.2", name: "Distancia desde Superficie de Pista", type: "general", penalty: "5 pts/mm", pp: true,
+        desc: "Medida CON cartucho de 8g insertado, desde el centro trasero del cartucho a la superficie de la pista, medida normal a la pista con el carro en 4 ruedas sin asistencia.",
+        measures: [
+          { label: "Mín", value: "30.0 mm", isMax: false },
+          { label: "Máx", value: "40.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T5.3", name: "Profundidad", type: "safety", penalty: "5 pts", pp: false,
+        desc: "Profundidad de la cámara medida paralela al plano de referencia vertical en cualquier punto de la circunferencia, desde la apertura hasta el fondo.",
+        measures: [
+          { label: "Mín", value: "45.0 mm", isMax: false },
+          { label: "Máx", value: "58.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T5.4", name: "Ángulo Máximo de Cámara", type: "safety", penalty: "5 pts", pp: false,
+        desc: "Ángulo máximo absoluto de la cámara, paralelo a la superficie de la pista. Medido CON cartucho de 8g insertado y carro en 4 ruedas sin asistencia.",
+        measures: [
+          { label: "Mín", value: "-3°", isMax: false },
+          { label: "Máx", value: "3°", isMax: true }
+        ]
+      },
+      {
+        id: "T5.5", name: "Zona de Seguridad de la Cámara", type: "safety", penalty: "10 pts", pp: false,
+        desc: "Una zona de seguridad de material Model Block con un espesor mínimo de 3.0mm debe mantenerse alrededor de la profundidad mínima de la cámara (T5.3). La circunferencia y profundidad completas NO deben ser intersectadas por ningún objeto. La cámara debe estar libre de pintura.",
+        measures: [
+          { label: "Mín espesor", value: "3.0 mm", isMax: false }
+        ],
+        note: "⚠️ IMPORTANTE: Toda la circunferencia y profundidad de la cámara NO debe ser intersectada por NINGÚN objeto."
+      },
+      {
+        id: "T5.6", name: "Visibilidad del Cartucho", type: "performance", penalty: "10 pts/mm", pp: true,
+        desc: "Cuando está completamente insertado, el cartucho DEBE extenderse al menos 5.0mm más allá de la parte trasera del carro. Debe ser completamente visible desde todos los ángulos en un barrido de 360° alrededor de su eje.",
+        measures: [
+          { label: "Mín protrusion", value: "5.0 mm", isMax: false }
+        ]
+      }
+    ]
+  },
+  // ══════════════════════════════════════════════════
+  // ARTICLE T6 — GUÍAS DE LÍNEA TETHER
+  // ══════════════════════════════════════════════════
+  {
+    article: "T6", articleName: "Guías de Línea Tether",
+    rules: [
+      {
+        id: "T6.1", name: "Ubicación", type: "safety", penalty: "10 pts", pp: false,
+        desc: "Cada carro debe tener SOLO dos (2) guías firmemente aseguradas: una EN o hasta 10.0mm DELANTE de la línea central del eje delantero, y una EN o hasta 10.0mm DETRÁS de la línea central del eje trasero. La línea tether SOLO debe pasar por las dos guías durante carreras.",
+        measures: [
+          { label: "Tolerancia", value: "10.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T6.2", name: "Dimensión Interna", type: "safety", penalty: "5 pts", pp: false,
+        desc: "Medida mínima y máxima interna de la abertura por donde pasa la línea tether. Se verificará con herramienta de 3.5mm y/o 6.0mm de diámetro.",
+        measures: [
+          { label: "Mín Ø", value: "3.5 mm", isMax: false },
+          { label: "Máx Ø", value: "6.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T6.3", name: "Seguridad de Guía Tether", type: "safety", penalty: "10 pts", pp: false, isNew: true,
+        desc: "Los agujeros deben estar completamente cerrados para evitar que la línea se salga durante carreras. Las guías deben ser robustas para prevenir cambio de diámetro o forma. Se suspenderá un peso de 300g de cada guía durante scrutineering.",
+        measures: [
+          { label: "Carga prueba", value: "300 g", isMax: true }
+        ],
+        note: "Actualizado para 2026: peso de prueba cambiado a 300g."
+      }
+    ]
+  },
+  // ══════════════════════════════════════════════════
+  // ARTICLE T7 — RUEDAS Y SOPORTES
+  // ══════════════════════════════════════════════════
+  {
+    article: "T7", articleName: "Ruedas y Estructuras de Soporte",
+    rules: [
+      {
+        id: "T7.1", name: "Número y Ubicación", type: "general", penalty: "25 pts", pp: false,
+        desc: "El carro debe incluir cuatro (4) ruedas cilíndricas: máximo 2 delante y máximo 2 atrás. Las ruedas opuestas deben compartir una línea central / eje común.",
+        measures: []
+      },
+      {
+        id: "T7.2.1", name: "Distancia entre Ruedas Opuestas — Eje Delantero", type: "performance", penalty: "2.5 pts/mm/eje", pp: true,
+        desc: "Distancia más interna de los componentes rotativos de la rueda (excepto eje rotativo) entre las dos ruedas opuestas, medida paralela a la pista.",
+        measures: [
+          { label: "Mín", value: "38.0 mm", isMax: false }
+        ]
+      },
+      {
+        id: "T7.2.2", name: "Distancia entre Ruedas Opuestas — Eje Trasero", type: "performance", penalty: "2.5 pts/mm/eje", pp: true, isNew: true,
+        desc: "Nueva dimensión trasera para 2026. Misma medición que T7.2.1 pero para el eje trasero.",
+        measures: [
+          { label: "Mín", value: "34.0 mm", isMax: false }
+        ],
+        note: "NUEVA DIMENSIÓN para 2026."
+      },
+      {
+        id: "T7.3", name: "Distancia entre Ejes (Wheelbase)", type: "performance", penalty: "5 pts/mm", pp: true,
+        desc: "Distancia entre la línea central de las ruedas delanteras y traseras vista en la vista lateral.",
+        measures: [
+          { label: "Mín", value: "120.0 mm", isMax: false },
+          { label: "Máx", value: "140.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T7.4.1", name: "Ancho Contacto Pista — Ruedas Delanteras", type: "performance", penalty: "2.5 pts/mm/rueda", pp: true, isNew: true,
+        desc: "Medida a lo largo de la superficie de la rueda que hace contacto constante con la pista, excluyendo chaflanes o filetes.",
+        measures: [
+          { label: "Mín", value: "12.0 mm", isMax: false }
+        ],
+        note: "Dimensiones ACTUALIZADAS para 2026."
+      },
+      {
+        id: "T7.4.2", name: "Ancho Contacto Pista — Ruedas Traseras", type: "performance", penalty: "2.5 pts/mm/rueda", pp: true, isNew: true,
+        desc: "Medida a lo largo de la superficie de la rueda que hace contacto constante con la pista, excluyendo chaflanes o filetes.",
+        measures: [
+          { label: "Mín", value: "15.0 mm", isMax: false }
+        ],
+        note: "Dimensiones ACTUALIZADAS para 2026."
+      },
+      {
+        id: "T7.5", name: "Diámetro de Rueda", type: "performance", penalty: "2.5 pts/mm/rueda", pp: true,
+        desc: "Diámetro de la rueda medido a través de la superficie de rodamiento del ancho mínimo de contacto con la pista.",
+        measures: [
+          { label: "Mín", value: "28.0 mm", isMax: false },
+          { label: "Máx", value: "32.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T7.6", name: "Contacto con Pista de Carrera", type: "performance", penalty: "2.5 pts/rueda", pp: false,
+        desc: "Las 4 ruedas DEBEN tocar la superficie de carrera al mismo tiempo en todo el ancho de contacto, medido CON cartucho insertado y carro en 4 ruedas sin asistencia. El contacto debe mantenerse antes y durante la carrera.",
+        measures: []
+      },
+      {
+        id: "T7.7", name: "Superficie de Rodamiento", type: "performance", penalty: "2.5 pts/rueda", pp: false,
+        desc: "El diámetro de la rueda debe ser consistente a lo largo del ancho de contacto con la pista. NO se permiten características tipo banda de rodamiento (tread).",
+        measures: []
+      },
+      {
+        id: "T7.8", name: "Rotación", type: "performance", penalty: "5 pts/rueda", pp: false,
+        desc: "Para facilitar el movimiento hacia adelante, las 4 ruedas deben rotar libremente sobre su eje usando una superficie inclinada de máximo 3°.",
+        measures: [
+          { label: "Máx inclinación", value: "3°", isMax: true }
+        ]
+      },
+      {
+        id: "T7.9", name: "Visibilidad en Vistas Superior/Inferior", type: "performance", penalty: "2.5–5 pts", pp: false,
+        desc: "La visibilidad de todas las ruedas NO debe estar físicamente obstruida por ningún componente en vistas superior e inferior. Se verifican zonas de despeje con herramientas de scrutineering específicas (ver diagramas del reglamento para dimensiones exactas de cada zona: T7.9.1 a T7.9.4).",
+        measures: [
+          { label: "Frente del. mín", value: "5.0 mm", isMax: false },
+          { label: "Detrás tras. mín", value: "5.0 mm", isMax: false }
+        ]
+      },
+      {
+        id: "T7.10", name: "Visibilidad en Vistas Laterales", type: "performance", penalty: "10 pts/rueda", pp: false,
+        desc: "La visibilidad de todas las ruedas NO debe estar físicamente obstruida por ningún componente EXCEPTO los sistemas de soporte de rueda, en las vistas laterales.",
+        measures: []
+      },
+      {
+        id: "T7.11", name: "Visibilidad en Vista Frontal", type: "performance", penalty: "10 pts/mm", pp: true,
+        desc: "La visibilidad de las ruedas delanteras en la vista frontal solo puede estar físicamente obstruida hasta una altura de 20.0mm desde la superficie de la pista. Medido CON cartucho de 8g insertado.",
+        measures: [
+          { label: "Máx obstrucción", value: "20.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T7.12", name: "Soporte de Rueda", type: "general", penalty: "5 pts c/u", pp: false,
+        desc: "Los sistemas de soporte solo pueden existir dentro del volumen cilíndrico generado por el diámetro de las dos ruedas opuestas. Las superficies DEBEN estar dimensionadas e identificadas en los planos de ingeniería.",
+        measures: []
+      },
+      {
+        id: "T7.13", name: "Prueba de Seguridad de Rueda", type: "safety", penalty: "2.5 pts/rueda", pp: false, isNew: true,
+        desc: "Para prevenir desprendimiento durante carreras. Se suspenderá un peso de 300g de cada rueda usando una garra de 3 dedos. Se requiere un despeje mínimo de 1.5mm desde la esquina interna de la rueda al cuerpo del carro.",
+        measures: [
+          { label: "Carga prueba", value: "300 g", isMax: true },
+          { label: "Despeje mín", value: "1.5 mm", isMax: false }
+        ],
+        note: "Actualizado para 2026: peso y diagrama de prueba actualizados."
+      },
+      {
+        id: "T7.14", name: "PIT STOP (Cambio de Rueda) — OPCIONAL", type: "general", penalty: "—", pp: false, isNew: true,
+        desc: "Los equipos PUEDEN diseñar una interfaz rueda-eje reutilizable que permita reemplazo rápido SIN adhesivos, agentes de unión o fijaciones permanentes. El cambio completo de una rueda debe lograrse en menos de 60 segundos. Las mejores soluciones serán nominadas para el PIT STOP Award.",
+        measures: [
+          { label: "Tiempo máx", value: "60 seg", isMax: true }
+        ],
+        note: "NUEVO y OPCIONAL para 2026. Oportunidad de award adicional."
+      }
+    ]
+  },
+  // ══════════════════════════════════════════════════
+  // ARTICLE T8 — NARIZ, ALA DELANTERA, END PLATES
+  // ══════════════════════════════════════════════════
+  {
+    article: "T8", articleName: "Nariz, Ala Delantera, End Plates y Soportes",
+    rules: [
+      {
+        id: "T8.1", name: "Identificación en Planos", type: "general", penalty: "5 pts", pp: false,
+        desc: "Las superficies que definen la nariz, ala(s) delantera(s), end plates y estructuras de soporte DEBEN estar dimensionadas e identificadas claramente por achurado, sombreado o color sólido en los planos de ingeniería.",
+        measures: []
+      },
+      {
+        id: "T8.2", name: "Dimensión del Nose Cone Assembly", type: "general", penalty: "5 pts c/u", pp: false,
+        desc: "Medida desde el Plano de Referencia A (16mm delante del eje delantero) hasta el frente extremo del carro completamente ensamblado.",
+        measures: [
+          { label: "Máx voladizo", value: "40.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T8.3", name: "Descripción y Colocación del Ala Delantera", type: "general", penalty: "5 pts", pp: false,
+        desc: "El diseño debe asemejarse a un carro F1® real mediante la inclusión de ala(s) en la nariz. Cada sección de ala debe tener un borde de ataque y un borde de fuga a lo largo de toda su envergadura.",
+        measures: []
+      },
+      {
+        id: "T8.5.1", name: "Ubicación Nariz y Soporte de Ala", type: "general", penalty: "10 pts", pp: false,
+        desc: "La nariz, ala delantera y soporte DEBEN estar delante del Plano de Referencia A, no más de 25.0mm sobre la pista y no más anchos de 15mm a cada lado de la línea central.",
+        measures: [
+          { label: "Máx altura", value: "25.0 mm", isMax: true },
+          { label: "Máx ancho c/lado", value: "15.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T8.5.2", name: "Ubicación Ala Delantera", type: "general", penalty: "10 pts", pp: false,
+        desc: "El ala delantera debe estar delante del Plano de Referencia A. No más de 20.0mm sobre la pista cuando es más ancha que 15mm a cada lado de la línea central.",
+        measures: [
+          { label: "Máx altura", value: "20.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T8.5.3", name: "Ubicación End Plates Delanteros", type: "general", penalty: "10 pts", pp: false,
+        desc: "Los end plates deben posicionarse FUERA de la envergadura legal mínima, con un ancho máximo de 10.0mm perpendicular al plano vertical, y no extenderse más de 25.0mm sobre la pista cuando están fuera (más allá) de las ruedas delanteras.",
+        measures: [
+          { label: "Máx ancho", value: "10.0 mm", isMax: true },
+          { label: "Máx altura", value: "25.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T8.6.1", name: "Envergadura del Ala Delantera", type: "performance", penalty: "2 pts/mm", pp: true,
+        desc: "Se mide perpendicular al plano vertical a lo largo de borde de ataque, borde de fuga, superficie superior e inferior: la MÁS CORTA se considera la envergadura máxima. Si el ala es dividida por otra parte del carro, la envergadura total es la suma de máx 2 segmentos de ala, cada uno NO menor a 25.0mm.",
+        measures: [
+          { label: "Mín total", value: "50.0 mm (25×2)", isMax: false }
+        ]
+      },
+      {
+        id: "T8.6.2", name: "Cuerda del Ala Delantera", type: "performance", penalty: "1 pt/mm", pp: true,
+        desc: "Distancia entre borde de ataque y borde de fuga de hasta 3 elementos que DEBEN traslaparse. Se mide paralelo al plano vertical y normal a la pista. Alas multi-vane deben traslaparse.",
+        measures: [
+          { label: "Mín", value: "15.0 mm", isMax: false },
+          { label: "Máx", value: "25.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T8.6.3", name: "Espesor del Ala Delantera", type: "performance", penalty: "1 pt/mm", pp: true,
+        desc: "El espesor mín/máx debe existir a lo largo de toda la envergadura existente del ala y en un punto a lo largo de la cuerda existente. No depende de la envergadura ni de la cuerda.",
+        measures: [
+          { label: "Mín", value: "2.0 mm", isMax: false },
+          { label: "Máx", value: "6.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T8.7", name: "Flujo de Aire Libre — Ala Delantera", type: "performance", penalty: "5 pts", pp: false,
+        desc: "El/las ala(s) delantera(s), medida(s) a lo largo de su envergadura mínima existente, DEBEN tener un mínimo de 5.0mm de espacio libre de 'aire' a cualquier otra parte del carro o superficie de la pista. Se verificará con una esfera de 5.0mm de diámetro en un vástago de 2mm.",
+        measures: [
+          { label: "Mín despeje", value: "5.0 mm", isMax: false }
+        ]
+      },
+      {
+        id: "T8.8", name: "Visibilidad del Ala Delantera", type: "performance", penalty: "10 pts", pp: false,
+        desc: "La visibilidad del ala delantera NO debe estar físicamente obstruida por ningún otro componente cuando se ve en la vista frontal.",
+        measures: []
+      }
+    ]
+  },
+  // ══════════════════════════════════════════════════
+  // ARTICLE T9 — ALA TRASERA Y SOPORTES
+  // ══════════════════════════════════════════════════
+  {
+    article: "T9", articleName: "Ala Trasera y Estructuras de Soporte",
+    rules: [
+      {
+        id: "T9.1", name: "Identificación en Planos", type: "general", penalty: "5 pts", pp: false,
+        desc: "Las superficies que definen el ala trasera y estructura(s) de soporte DEBEN estar dimensionadas e identificadas claramente por achurado, sombreado o color sólido en los planos de ingeniería.",
+        measures: []
+      },
+      {
+        id: "T9.2", name: "Descripción y Colocación", type: "general", penalty: "5 pts", pp: false,
+        desc: "El diseño debe asemejarse a un carro F1® real con un ala en la parte trasera. Debe tener un borde de ataque y un borde de fuga a lo largo de su envergadura requerida.",
+        measures: []
+      },
+      {
+        id: "T9.3", name: "Construcción y Rigidez", type: "general", penalty: "5 pts", pp: false,
+        desc: "El ala trasera y soportes pueden fabricarse de cualquier material. La dimensión de envergadura DEBE permanecer sin cambios durante las carreras (las alas deben ser rígidas).",
+        measures: []
+      },
+      {
+        id: "T9.4.1", name: "Ubicación Ala y Soporte Trasero", type: "general", penalty: "10 pts", pp: false,
+        desc: "TODO el ala trasera y cualquier estructura de soporte DEBE estar detrás del Plano de Referencia B (16mm detrás del eje trasero).",
+        measures: []
+      },
+      {
+        id: "T9.4.2", name: "Longitud Voladizo Trasero", type: "general", penalty: "5 pts", pp: false,
+        desc: "Medida desde el Plano de Referencia B hasta el extremo trasero del carro completamente ensamblado.",
+        measures: [
+          { label: "Máx", value: "40.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T9.4.3", name: "Altura Voladizo Trasero", type: "general", penalty: "5 pts", pp: false,
+        desc: "Medida desde detrás del Plano de Referencia B hasta el punto más alto del carro desde la superficie de la pista.",
+        measures: [
+          { label: "Máx", value: "65.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T9.5.1", name: "Envergadura del Ala Trasera", type: "performance", penalty: "2 pts/mm", pp: true,
+        desc: "Se mide perpendicular al plano vertical a lo largo de borde de ataque, fuga, superficie superior e inferior; la MÁS CORTA se considera la envergadura máxima. El ala trasera DEBE existir como una envergadura mínima ÚNICA E ININTERRUMPIDA de 50.0mm.",
+        measures: [
+          { label: "Mín", value: "50.0 mm", isMax: false }
+        ],
+        note: "⚠️ A diferencia del ala delantera (2 segmentos), el ala trasera debe ser un SOLO tramo continuo de ≥50mm."
+      },
+      {
+        id: "T9.5.2", name: "Cuerda del Ala Trasera", type: "performance", penalty: "1 pt/mm", pp: true,
+        desc: "Distancia entre borde de ataque y borde de fuga de hasta 2 elementos que DEBEN traslaparse. Se mide paralelo al plano vertical y normal a la pista. Alas multi-vane deben traslaparse.",
+        measures: [
+          { label: "Mín", value: "15.0 mm", isMax: false },
+          { label: "Máx", value: "25.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T9.5.3", name: "Espesor del Ala Trasera", type: "performance", penalty: "1 pt/mm", pp: true,
+        desc: "El espesor mín/máx debe existir a lo largo de toda la envergadura existente del ala y en un punto a lo largo de la cuerda existente.",
+        measures: [
+          { label: "Mín", value: "2.0 mm", isMax: false },
+          { label: "Máx", value: "6.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T9.5.4", name: "Desviación de Altura del Ala Trasera", type: "general", penalty: "1 pt/mm", pp: true,
+        desc: "Cambio máximo en desviación de altura desde el punto más alto del ala. Medido a lo largo de la envergadura mínima en la superficie superior.",
+        measures: [
+          { label: "Máx desviación", value: "15.0 mm", isMax: true }
+        ]
+      },
+      {
+        id: "T9.6", name: "Flujo de Aire Libre — Ala Trasera", type: "performance", penalty: "5 pts", pp: false,
+        desc: "El ala trasera, medida a lo largo de su envergadura existente, DEBE tener un mínimo de 5.0mm de espacio libre a cualquier otra parte del carro o superficie de la pista. Se verificará con esfera de 5.0mm en vástago de 2mm.",
+        measures: [
+          { label: "Mín despeje", value: "5.0 mm", isMax: false }
+        ]
+      },
+      {
+        id: "T9.7", name: "Visibilidad del Ala Trasera", type: "performance", penalty: "10 pts", pp: false,
+        desc: "La visibilidad del ala trasera NO debe estar físicamente obstruida por ningún otro componente cuando se ve en la vista frontal Y trasera a lo largo de la envergadura mínima.",
+        measures: []
+      }
+    ]
+  },
+  // ══════════════════════════════════════════════════
+  // ARTICLE T1 — DEFINICIONES CLAVE (referencia rápida)
+  // ══════════════════════════════════════════════════
+  {
+    article: "REF", articleName: "Planos de Referencia y Datos Clave",
+    rules: [
+      {
+        id: "T1.17.1", name: "Plano de Referencia Vertical", type: "general", penalty: "—", pp: false,
+        desc: "Plano 2D invisible a lo largo del eje central de la cámara del cartucho, normal a la superficie de la pista.",
+        measures: []
+      },
+      {
+        id: "T1.17.2", name: "Plano de Referencia A", type: "general", penalty: "—", pp: false,
+        desc: "Plano 2D invisible ubicado 16.0mm DELANTE de la línea central del eje delantero, normal a la superficie de la pista. Define el límite delantero del cuerpo.",
+        measures: [
+          { label: "Distancia", value: "16.0 mm delante eje del.", isMax: false }
+        ]
+      },
+      {
+        id: "T1.17.3", name: "Plano de Referencia B", type: "general", penalty: "—", pp: false,
+        desc: "Plano 2D invisible ubicado 16.0mm DETRÁS de la línea central del eje trasero, normal a la superficie de la pista. Define el límite trasero del cuerpo.",
+        measures: [
+          { label: "Distancia", value: "16.0 mm detrás eje tras.", isMax: false }
+        ]
+      },
+      {
+        id: "T1.22", name: "Lastre Legal", type: "general", penalty: "—", pp: false,
+        desc: "Para alcanzar el peso mínimo, el lastre legal SOLO puede añadirse al contenedor bajo el halo, accesible a través de la apertura halo/casco. Esta es la ÚNICA ubicación permitida. Materiales no peligrosos como pesos de pesca. Uso opcional pero fuertemente recomendado.",
+        measures: [],
+        note: "El casco NO debe pegarse para permitir ajustes de lastre antes del scrutineering."
+      },
+      {
+        id: "VI", name: "Dimensiones del Cartucho (Race Power Pack)", type: "general", penalty: "—", pp: false,
+        desc: "Cartucho metálico con carga de 8g de aire comprimido. Diámetro: Ø18.0-18.25mm. Longitud: 65.0mm (+0.5/-0.5). Diámetro cabeza: Ø8.70 (+0.0/-0.1).",
+        measures: [
+          { label: "Peso", value: "28.9–29.4 g", isMax: false },
+          { label: "Longitud", value: "65.0 mm ±0.5", isMax: false }
+        ]
+      },
+      {
+        id: "I", name: "Finish Gate — Beam Info", type: "general", penalty: "—", pp: false,
+        desc: "La distancia del centro de la línea del emisor a la superficie de la pista en ambos carriles es ~7mm. Los end plates delanteros pueden ayudar a romper el beam del finish line; considerar su altura, ancho y posición para optimizar detección.",
+        measures: [
+          { label: "Altura beam", value: "~7.0 mm", isMax: false }
+        ]
+      }
+    ]
+  }
+];
+
+// ═══════════════ RENDER ═══════════════
+let currentFilter = 'all';
+let searchTerm = '';
+
+function countByType(type) {
+  let c = 0;
+  DATA.forEach(a => a.rules.forEach(r => { if (r.type === type) c++; }));
+  return c;
+}
+
+function renderStats() {
+  let total = 0;
+  DATA.forEach(a => total += a.rules.length);
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statSafety').textContent = countByType('safety');
+  document.getElementById('statPerf').textContent = countByType('performance');
+  document.getElementById('statGen').textContent = countByType('general');
+}
+
+function matchesFilter(rule) {
+  if (currentFilter === 'all') return true;
+  if (currentFilter === 'pp') return rule.pp;
+  return rule.type === currentFilter;
+}
+
+function matchesSearch(rule) {
+  if (!searchTerm) return true;
+  const s = searchTerm.toLowerCase();
+  return (
+    rule.id.toLowerCase().includes(s) ||
+    rule.name.toLowerCase().includes(s) ||
+    rule.desc.toLowerCase().includes(s) ||
+    (rule.note && rule.note.toLowerCase().includes(s))
+  );
+}
+
+function renderAll() {
+  const container = document.getElementById('rulesContainer');
+  container.innerHTML = '';
+
+  DATA.forEach(article => {
+    const visibleRules = article.rules.filter(r => matchesFilter(r) && matchesSearch(r));
+    if (visibleRules.length === 0) return;
+
+    const section = document.createElement('div');
+    section.className = 'article-section open';
+
+    const header = document.createElement('div');
+    header.className = 'article-header';
+    header.innerHTML = `
+      <div class="article-title"><span class="art-num">${article.article}</span>${article.articleName}</div>
+      <span class="chevron">▼</span>
+    `;
+    header.onclick = () => section.classList.toggle('open');
+
+    const body = document.createElement('div');
+    body.className = 'article-body';
+
+    visibleRules.forEach(rule => {
+      const card = document.createElement('div');
+      card.className = 'rule-card';
+      card.setAttribute('data-type', rule.type);
+
+      let badgeClass = rule.type === 'safety' ? 'badge-safety' : rule.type === 'performance' ? 'badge-performance' : 'badge-general';
+      let typeName = rule.type === 'safety' ? 'SAFETY' : rule.type === 'performance' ? 'PERFORMANCE' : 'GENERAL';
+
+      let badges = `<span class="badge ${badgeClass}">${typeName}</span>`;
+      if (rule.pp) badges += `<span class="badge badge-pp">PP+</span>`;
+      if (rule.isNew) badges += `<span class="new-tag">Nuevo 2026</span>`;
+
+      let measuresHTML = '';
+      if (rule.measures.length > 0) {
+        measuresHTML = '<div class="rule-measures">';
+        rule.measures.forEach(m => {
+          const cls = m.isMax ? 'val-max' : 'val';
+          measuresHTML += `<div class="measure"><span class="lbl">${m.label}</span><span class="${cls}">${m.value}</span></div>`;
+        });
+        measuresHTML += '</div>';
+      }
+
+      let noteHTML = '';
+      if (rule.note) {
+        const noteCls = rule.type === 'safety' ? 'note note-safety' : 'note';
+        noteHTML = `<div class="${noteCls}">${rule.note}</div>`;
+      }
+
+      let penaltyHTML = '';
+      if (rule.penalty && rule.penalty !== '—') {
+        penaltyHTML = `<span class="penalty-tag">⚡ ${rule.penalty}</span>`;
+      }
+
+      card.innerHTML = `
+        <div class="rule-top">
+          <span class="rule-id">${rule.id}</span>
+          <span class="rule-name">${rule.name}</span>
+          <div class="rule-badges">${badges} ${penaltyHTML}</div>
+        </div>
+        <div class="rule-desc">${rule.desc}</div>
+        ${measuresHTML}
+        ${noteHTML}
+      `;
+      body.appendChild(card);
+    });
+
+    section.appendChild(header);
+    section.appendChild(body);
+    container.appendChild(section);
+  });
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.className = 'filter-btn';
+  });
+  const cls = f === 'all' ? 'active-all' : f === 'safety' ? 'active-safety' : f === 'performance' ? 'active-perf' : f === 'general' ? 'active-gen' : 'active-all';
+  btn.classList.add(cls);
+  renderAll();
+}
+
+document.getElementById('searchBox').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  renderAll();
+});
+
+renderStats();
+renderAll();
+</script>
+</body>
+</html>
